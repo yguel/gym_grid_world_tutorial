@@ -1,0 +1,19 @@
+# python 
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+
+# jupyter
+.ipynb_checkpoints/
+jupyter/grid_world_frozen_lake.ipynb
+
+# course
+gym_grid_world_tutorial/test.py
+grid_world_frozen_lake2_step_by_step_tutorial_debug_tests00.ipynb
+
+# image tests
+gym_grid_world_tutorial/img/material
+
+# images experiments
+jupyter/step_by_step_lab/img
