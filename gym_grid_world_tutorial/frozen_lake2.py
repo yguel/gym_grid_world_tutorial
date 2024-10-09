@@ -356,6 +356,14 @@ class FrozenLake2Env(Env):
         self.start_img = None
         self.blocked_by_warning_img = None
 
+        # Create arrow tiles
+        self.arrow_tiles = {
+            Action.LEFT: "←",
+            Action.DOWN: "↓",
+            Action.RIGHT: "→",
+            Action.UP: "↑",
+        }
+
     def init_window(self,cell_side : int=64,max_win_side: int=1024):
         self.cell_side = cell_side
         self.max_win_side = max_win_side
@@ -628,9 +636,14 @@ class FrozenLake2Env(Env):
          - In shades of green from light to most vivid you have the cells with the 
          lowest values (most light green) to the highest values (most vivid green).
 
-         Parameters
-         ----------
+            Params
+            ------
             values : a function that maps a state: a couple of coordinates (row, col) to a value
+            minmax_values : a tuple with the minimum and maximum values of the value function
+
+            Returns
+            -------
+            An image of the value function as a grid.
         """
         try:
             import pygame
@@ -696,14 +709,66 @@ class FrozenLake2Env(Env):
         """
         res = self.create_value_image(values,minmax_values)
         return self.create_image_with_row_col_coordinates(res)
-
+  
     def create_policy_image(self, policy) -> np.ndarray:
         """
         Create an image of the policy as a grid with an arrow in the center of each cell
         pointing in the direction of the action to take.
         """
-        pass
+        try:
+            import pygame
+        except ImportError:
+            raise DependencyNotInstalled(
+                "pygame is not installed, run `pip install gym[toy_text]`"
+            )
+        self.init_window(128,2048)
+        pygame.init()
+        self.window_surface = pygame.Surface(self.window_size)
+        
+        assert (
+            self.window_surface is not None
+        ), "Something went wrong with pygame. This should never happen."
 
+        min_cell_size : int = min(self.cell_size[0],self.cell_size[1])
+        font_size : int = int(min_cell_size * 0.5)
+        font = pygame.font.SysFont("Arial", font_size)
+
+        cell_outline_color = (255, 255, 255)    # White
+        arrow_color = (255, 255, 255)            # White
+
+        # Use the arrow symbols stored in the arrow_tiles attribute
+        # to draw text in the center of the cell
+
+        # Iterate over the cells and draw the policy
+        desc = self.desc.tolist()
+        for row in range(self.nrow):
+            for col in range(self.ncol):
+                pos = (col * self.cell_size[0], (row) * self.cell_size[1])
+                rect = (*pos, *self.cell_size)
+                pyrect = pygame.Rect(*rect)
+                if desc[row][col] == b"B":
+                    pygame.draw.rect(self.window_surface, (128, 128, 128), pyrect)
+                    pygame.draw.rect(self.window_surface, cell_outline_color, pyrect, width=1)
+                else:
+                    action = policy(row, col)
+                    if action is not None:
+                        # get character for action
+                        arrow = self.arrow_tiles[Action(action)]
+                        text = font.render(arrow, True, arrow_color)
+                        text_rect = text.get_rect(center=self._center_small_rect(rect, text.get_size()))
+                        text_rect.center = pyrect.center
+                        pygame.draw.rect(self.window_surface, cell_outline_color, pyrect, width=1)
+                        self.window_surface.blit(text, text_rect)
+                        
+        return np.transpose(np.array(pygame.surfarray.pixels3d(self.window_surface)), axes=(1, 0, 2))
+
+    def create_policy_image_with_row_col_coordinates(self, policy) -> np.ndarray:
+        """
+        Use the create_policy_image function to create an image of the policy in the grid and add a row and a column
+        where in the first row the column index is displayed and in the first column the row index is displayed.
+        """
+        res = self.create_policy_image(policy)
+        return self.create_image_with_row_col_coordinates(res)
 
 # Elf and stool from https://franuka.itch.io/rpg-snow-tileset
 # All other assets by Mel Tillery http://www.cyaneus.com/

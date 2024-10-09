@@ -61,3 +61,27 @@ def plot_val_coords(env,values,minmax,frame_title: Optional[str]=None):
     else:
         fig.savefig(params.savefig_folder, bbox_inches="tight")
     plt.show()
+
+def plot_policy(env,policy,frame_title: Optional[str]=None):
+    fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(6, 5))
+    ax.imshow(env.create_policy_image(policy))
+    ax.axis("off")
+    if None != frame_title:
+        ax.set_title("Frame "+frame_title)
+        img_title = f"frozenlake_policy_frame_{frame_title}.png"
+        fig.savefig(params.savefig_folder / img_title, bbox_inches="tight")
+    else:
+        fig.savefig(params.savefig_folder, bbox_inches="tight")
+    plt.show()
+
+def plot_policy_coords(env,policy,frame_title: Optional[str]=None):
+    fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(6, 5))
+    ax.imshow(env.create_policy_image_with_row_col_coordinates(policy))
+    ax.axis("off")
+    if None != frame_title:
+        ax.set_title("Frame "+frame_title)
+        img_title = f"frozenlake_policy_frame_{frame_title}.png"
+        fig.savefig(params.savefig_folder / img_title, bbox_inches="tight")
+    else:
+        fig.savefig(params.savefig_folder, bbox_inches="tight")
+    plt.show()
