@@ -21,6 +21,17 @@ class Action(Enum):
     RIGHT = 2
     UP = 3
 
+def action2deltaCoord(action: Action) -> tuple[int,int]:
+    if action == Action.LEFT:
+        return (0,-1)
+    if action == Action.DOWN:
+        return (1,0)
+    if action == Action.RIGHT:
+        return (0,1)
+    if action == Action.UP:
+        return (-1,0)
+    raise ValueError(f"Unknown action: {action}")
+
 def text2action(text: str) -> Action:
     if text == "LEFT":
         return Action.LEFT
@@ -225,7 +236,10 @@ class FrozenLake2Env(Env):
         elif action == UP:
             new_row = max(row - 1, 0)
             new_col = col
-        return (new_row, new_col)
+        if self.is_blocked_coordinates(new_row,new_col):
+            return (row,col)
+        else:
+            return (new_row, new_col)
     
     def scale_value_in01(self,value,minmax_values):
         min_value, max_value = minmax_values

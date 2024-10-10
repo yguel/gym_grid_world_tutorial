@@ -42,13 +42,13 @@ class RlAgent:
                 for action in range(env.action_space.n):
                     for s_next in range(env.state_space.n):
                         s_next_coords = env.cell_id_to_cell_coordinates(s_next)
-                        prob = self.transitions_f(s_coords,action,s_next_coords)
+                        prob = self.transitions_f(self.env,s_coords,action,s_next_coords)
                         next_values[action] += prob * gamma * self.values_tabs[prev][s_next_coords[0]][s_next_coords[1]]
                 self.values_tabs[next][row][col] = reward + max(next_values)
         self.v_idx = next
     
     def rewards(self,row,col):
-        return self.rewards_f(self.env.desc[row,col])
+        return self.rewards_f(self.env,(row,col))
     
     def values(self,row,col):
         return self.values_tabs[self.v_idx][row][col]
