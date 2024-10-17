@@ -773,6 +773,15 @@ class FrozenLake2Env(Env):
                         text_rect.center = pyrect.center
                         pygame.draw.rect(self.window_surface, cell_outline_color, pyrect, width=1)
                         self.window_surface.blit(text, text_rect)
+                    else:
+                        # we are in a terminal or blocked cell, draw accordingly
+                        if desc[row][col] in b"H":
+                            pygame.draw.rect(self.window_surface, (255, 0, 0), pyrect)
+                        elif desc[row][col] in b"G":
+                            pygame.draw.rect(self.window_surface, (0, 255, 0), pyrect)
+                        else:
+                            pygame.draw.rect(self.window_surface, (128, 128, 128), pyrect)
+                        pygame.draw.rect(self.window_surface, cell_outline_color, pyrect, width=1)
                         
         return np.transpose(np.array(pygame.surfarray.pixels3d(self.window_surface)), axes=(1, 0, 2))
 
@@ -783,6 +792,23 @@ class FrozenLake2Env(Env):
         """
         res = self.create_policy_image(policy)
         return self.create_image_with_row_col_coordinates(res)
+    
+    def create_policy(self,value):
+        def policy(row,col):
+            if self.is_terminal_coordinates(row,col):
+                return None
+            # init with first action
+            new_cell = self.transition_coordinates(row,col,0)
+            max_action = 0
+            max_value = value(*new_cell)
+            for a in range(1,4):
+                new_cell = self.transition_coordinates(row,col,a)
+                new_value = value(*new_cell)
+                if new_value > max_value:
+                    max_value = new_value
+                    max_action = a
+            return max_action
+        return policy
 
 # Elf and stool from https://franuka.itch.io/rpg-snow-tileset
 # All other assets by Mel Tillery http://www.cyaneus.com/
