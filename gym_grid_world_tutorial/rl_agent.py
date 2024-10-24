@@ -15,8 +15,11 @@ class RlAgent:
         #Value computations
         self.values_tabs = [ np.zeros((nrow,ncol)), np.zeros((nrow, ncol)) ]
         self.v_idx = 0
-    
+
     def compute_next_values(self, rewards_f=None, transitions_f=None, gamma : Optional[float]=None):
+        self.compute_next_values_2_tables(rewards_f,transitions_f,gamma)
+    
+    def compute_next_values_2_tables(self, rewards_f=None, transitions_f=None, gamma : Optional[float]=None):
         env = self.env
         if None != gamma:
             self.gamma = gamma
